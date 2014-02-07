@@ -1,0 +1,760 @@
+<?php
+class dbManager
+{
+	public function configuracion($page) {
+		if(!ISSET($_COOKIE["useralmacen"])){
+			setcookie("page", $page);	
+  			 header('Location: LogIn.php');
+		}else{
+				if($page=="articulos.php"){
+						if($_COOKIE["nivel"]!= md5("1A")&& $_COOKIE["nivel"]!=md5("1")){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				if($page=="proveedores.php"){
+						if($_COOKIE["nivel"]!=md5('1A')&&$_COOKIE["nivel"]!=md5('1')){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				if($page=="recepciones.php"){
+						if($_COOKIE["nivel"]!=md5('1A')&&$_COOKIE["nivel"]!=MD5('1')&&$_COOKIE["nivel"]!=md5('1B')){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				
+				if($page=="salidas.php"){
+						if($_COOKIE["nivel"]!=md5('1A')&&$_COOKIE["nivel"]!=md5('1')&&$_COOKIE["nivel"]!=md5('1B')){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				if($page=="peticiones.php"){
+						if($_COOKIE["nivel"]!=md5('1A')&&$_COOKIE["nivel"]!=md5('1')&&$_COOKIE["nivel"]!=md5('2B')){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				if($page=="autorizaciones.php"){
+						if($_COOKIE["nivel"]!=md5('1A')&&$_COOKIE["nivel"]!=md5('1')&&$_COOKIE["nivel"]!=md5('2A')){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				if($page=="usuarios.php"){
+						if($_COOKIE["nivel"]!=md5('1A')&&$_COOKIE["nivel"]!=md5('1')){
+								setcookie("page", $page);	
+  			              header('Location: LogIn.php');						
+						
+						}
+				}
+				
+		
+		}
+	    
+	}
+   public function  autenticar($us,$pw){
+		require('settings.php');
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$query = "SELECT MD5(nivel) as nivel , nombre, paterno, materno, idusuario FROM inv_usuarios WHERE nick='".$us."' AND password=MD5('".$pw."') AND borrado='0';";
+				
+		$result = pg_query($query) or die('La consulta fallo: ' . pg_last_error());
+		//$arr = pg_fetch_array($result, 0, PGSQL_NUM);
+		$nivel="";
+		$nombre="";
+		$id="";
+	while($row=pg_fetch_assoc($result)){
+	       $nombre=$row['nombre'].' '.$row['paterno'].' '.$row['materno'];
+	       $nivel=$row['nivel']; 
+	       $id=$row['idusuario'];
+		}
+		//$result->close();
+	return  array($nivel,$nombre,$id);
+	
+   
+   }
+   
+   
+   
+   public function getProovedores() {
+			$uss=array("","","","");		
+			
+			require('settings.php');
+	      $sql="SELECT idproveedor,nombre, descripcion, direccion FROM inv_proveedores WHERE borrado='0' ;"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['idproveedor'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	             $uss[2]=$uss[2].",".$row['descripcion'];
+	             $uss[3]=$uss[3].",".$row['direccion']; 
+	            
+				}
+				
+			
+		     	$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+								
+		      return $uss;
+		}
+		public function getProovedoresEn() {
+			$uss=array("","","","");		
+			
+			require('settings.php');
+	      $sql="SELECT MD5(idproveedor) as idproveedor ,nombre, descripcion, direccion FROM inv_proveedores WHERE borrado='0';"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['idproveedor'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	             $uss[2]=$uss[2].",".$row['descripcion'];
+	             $uss[3]=$uss[3].",".$row['direccion']; 
+	            
+				}
+				
+			
+		     	$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+								
+		      return $uss;
+		}
+		public function agregaProveedor($n, $des,$dir){
+			require('settings.php');
+	      $sql="INSERT INTO inv_proveedores (nombre,descripcion,direccion) VALUES('".$n."','".$des."','".$dir."');"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function editarProveedor($n, $des,$dir,$idp){
+			require('settings.php');
+	      $sql="UPDATE inv_proveedores SET nombre='".$n."',descripcion='".$des."',direccion='".$dir."' WHERE MD5(idproveedor)='".$idp."';";  
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function borraProveedor($idp){
+			require('settings.php');
+	      $sql="UPDATE inv_proveedores SET borrado='1' WHERE MD5(idproveedor)='".$idp."';";  
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function getProveedor($id){
+		
+			
+			$uss=array("","","","");		
+			require('settings.php');
+	      $sql="select MD5(idproveedor) as idproveedor , nombre, descripcion,direccion WHERE MD5(IDPROVEEDOR)='".$id."'"; 
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	           
+	             $uss[0]=$uss[0].",".$row['idproveedor'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	             $uss[2]=$uss[2].",".$row['descripcion'];
+	             $uss[3]=$uss[3].",".$row['direccion']; 
+	            
+				}
+								
+		      
+		      return $uss;
+		}
+		public function agregaArticulo($n, $des,$ip1,$p1,$ip2,$p2,$ip3,$p3){
+			require('settings.php');
+	      $sql="INSERT INTO inv_articulos (nombre,descripcion,id_proveedor1,precio1,id_proveedor2,precio2,id_proveedor3,precio3) VALUES('".$n."','".$des."','".$ip1."','".$p1."','".$ip2."','".$p2."','".$ip3."','".$p3."');"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		
+		public function getProductos(){
+		
+			$uss=array("","","","","","","","","");		
+			require('settings.php');
+	      $sql="select MD5(idarticulo) as idarticulo , nombre, descripcion,(SELECT nombre from inv_proveedores WHERE inv_proveedores.idproveedor=inv_articulos.id_proveedor1) as prov1, precio1,(SELECT nombre from inv_proveedores WHERE inv_proveedores.idproveedor=inv_articulos.id_proveedor2) as prov2, precio2,(SELECT nombre from inv_proveedores WHERE inv_proveedores.idproveedor=inv_articulos.id_proveedor3) as prov3, precio3 from inv_articulos WHERE borrado='0' ORDER BY nombre"; 
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['idarticulo'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	            
+	             $uss[2]=$uss[2].",".$row['descripcion'];
+	             $uss[3]=$uss[3].",".$row['prov1']; 
+	             $uss[4]=$uss[4].",".$row['precio1'];
+	             $uss[5]=$uss[5].",".$row['prov2']; 
+	             $uss[6]=$uss[6].",".$row['precio2'];
+	             $uss[7]=$uss[7].",".$row['prov3']; 
+	             
+	             $uss[8]=$uss[8].",".$row['precio3']; 
+	            
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+				$uss[4]=substr($uss[4], 1, strlen($uss[4]));
+				$uss[5]=substr($uss[5], 1, strlen($uss[5]));
+				$uss[6]=substr($uss[6], 1, strlen($uss[6]));
+			   $uss[7]=substr($uss[7], 1, strlen($uss[7]));
+				$uss[8]=substr($uss[8], 1, strlen($uss[8]));
+								
+		      return $uss;
+		}
+		public function getProductosL(){
+		
+			$uss=array("","","","","","","","","");		
+			require('settings.php');
+	      $sql="select  idarticulo , nombre FROM inv_articulos WHERE borrado='0' ORDER BY nombre"; 
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['idarticulo'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	            
+	           
+	            
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				
+								
+		      return $uss;
+		}
+		public function getProducto($idarticulo){
+		
+			
+			$uss=array("","","","","","","","","");		
+			require('settings.php');
+	      $sql="select MD5(idarticulo) as idarticulo , nombre, descripcion,id_proveedor1 as prov1, precio1,id_proveedor2 as prov2, precio2,id_proveedor3 as prov3, precio3 from inv_articulos WHERE MD5(idarticulo)='".$idarticulo."'"; 
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	           
+	             $uss[0]=$row['idarticulo'];
+	             $uss[1]=$row['nombre']; 
+	             $uss[2]=$row['descripcion'];
+	             $uss[3]=$row['prov1']; 
+	             $uss[4]=$row['precio1'];
+	             $uss[5]=$row['prov2']; 
+	             
+	             $uss[6]=$row['precio2'];
+	             $uss[7]=$row['prov3']; 
+	             $uss[8]=$row['precio3']; 
+	            
+				}
+				
+								
+		      
+		      return $uss;
+		}
+		public function editarArticulo($n, $des,$ip1,$p1,$ip2,$p2,$ip3,$p3,$idart){
+			require('settings.php');
+	      $sql="UPDATE inv_articulos SET nombre='".$n."',descripcion='".$des."',id_proveedor1='".$ip1."',precio1='".$p1."',id_proveedor2='".$ip2."',precio2='".$p2."',id_proveedor3='".$ip3."',precio3='".$p3."' WHERE MD5(idarticulo)='".$idart."';"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function borraArticulo($idart){
+			require('settings.php');
+	      $sql="UPDATE inv_articulos SET borrado='1' WHERE MD5(idarticulo)='".$idart."';"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function valida(&$palabra,$numero){
+			$resp=true;
+			
+			
+			if($numero==true){
+				if(!is_numeric($palabra)){
+					if(!is_float($palabra)){
+					$resp=false;	
+					//echo($palabra); 			
+					}
+				}			
+			
+			}else{
+					$palabra = addslashes($palabra);
+					/*if (ereg("[^A-Za-z0-9]+",trim($palabra," "))) {
+					$resp=false;
+						} */
+			}
+			
+			
+			return $resp;
+			
+		
+		
+		}
+		
+		public function agregarPeticion($id,$cantidad,$us){
+			require('settings.php');
+			
+			$sql="INSERT INTO  inv_peticiones (id_articulo,cantidad,id_usuario_peticion,fecha,entregada) VALUES(".$id.",".$cantidad.",".$us.",now(),'0');"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+	      $result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function getPeticiones($us){
+			$uss=array("","","","");		
+			require('settings.php');
+	      $sql="select inv_articulos.nombre,inv_peticiones.cantidad,inv_peticiones.fecha, disponible  from inv_peticiones INNER JOIN inv_articulos ON inv_peticiones.id_articulo=inv_articulos.idarticulo LEFT JOIN inv_almacen ON inv_almacen.idarticulo=inv_articulos.idarticulo  WHERE inv_peticiones.id_usuario_peticion=".$us." AND inv_peticiones.entregada=0 ORDER BY fecha DESC;"; 
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['nombre'];
+	             $uss[1]=$uss[1].",".$row['cantidad']; 
+	            
+	             $uss[2]=$uss[2].",".$row['fecha'];
+	             $uss[3]=$uss[3].",".$row['disponible'];
+	           
+	            
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+								
+		      return $uss;		
+		
+		}
+		public function agregaEntrada($idart, $cant,$idus,$idprov){
+			require('settings.php');
+	      $sql="INSERT INTO inv_entradas (idarticulo,cantidad,id_usuario,fecha,id_proveedor) VALUES (".$idart.",".$cant.",".$idus.",now(),".$idprov.");"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//Si hay registros en el almacen se hace un update si no un insert
+			$sql="SELECT COUNT(*) as cont FROM inv_almacen WHERE idarticulo=".$idart.";";
+			$count="0";
+			$result2=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result2)){
+				$count=$row["cont"];
+			}
+			
+			if(intval($count)>0){//entonces un update
+				$sql="UPDATE inv_almacen SET disponible=disponible+".$cant.", id_usuario_ultima_recepcion=".$idus.",ultima_fecha_recepcion=now() WHERE idarticulo=".$idart.";";
+				$result3=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			}else{//si no un insert
+			
+			$sql="INSERT INTO inv_almacen (disponible,id_usuario_ultima_recepcion,ultima_fecha_recepcion,idarticulo) VALUES(".$cant.", ".$idus.",now(),".$idart.");";
+				$result3=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			}
+		}
+		public function getRecepciones($us){
+		   $uss=array("","","","","");		
+			require('settings.php');
+			$sql="SELECT MD5(identrada) as identrada, inv_articulos.nombre, inv_entradas.cantidad, inv_entradas.fecha, MD5(inv_articulos.idarticulo) as idarticulo FROM inv_articulos INNER JOIN inv_entradas ON inv_entradas.idarticulo=inv_articulos.idarticulo WHERE inv_entradas.id_usuario=".$us." AND revertido=0  ORDER BY  inv_entradas.identrada DESC limit 10;";
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['identrada'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	            
+	             $uss[2]=$uss[2].",".$row['cantidad'];
+	             $uss[3]=$uss[3].",".$row['fecha'];
+	              $uss[4]=$uss[4].",".$row['idarticulo'];
+	             
+	           
+	            
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+				$uss[4]=substr($uss[4], 1, strlen($uss[4]));
+								
+		      return $uss;		
+		
+		}
+		public function revertirEntrada($idart, $cant,$identrada){
+			require('settings.php');
+	      $sql="UPDATE inv_entradas SET revertido=1 WHERE MD5(identrada)='".$identrada."';"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//se revierte la cantidad en el almacen
+			$sql="UPDATE inv_almacen SET disponible=disponible-".$cant." WHERE MD5(idarticulo)='".$idart."';";
+			//echo($sql);
+			$result2=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//revisar si la cantidad es menor a cero
+			$count="0";
+			$sql= "SELECT disponible FROM inv_almacen WHERE MD5(idarticulo)='".$idart."'";
+			$result3=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result3)){
+				$count=$row["disponible"];
+			}
+			if(intval($count)<0){//entonces un update
+				$sql="UPDATE inv_almacen SET disponible=0 WHERE MD5(idarticulo)='".$idart."';";
+				$result4=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			}
+		}
+		public function haySuficientes($id_art,$cantidad){
+			$resp=false;
+			require('settings.php');
+			$sql="SELECT disponible FROM inv_almacen WHERE idarticulo=".$id_art.";";
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$count="0";
+			$result3=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result3)){
+				$count=$row["disponible"];
+			}
+			if(intval($count)>=$cantidad){
+				$resp=true;
+			}else{
+				$resp=false;
+			}
+			return $resp;
+		}
+		public function generaSalidasinPet($idart, $cant,$idus){
+			require('settings.php');
+	      $sql="INSERT INTO inv_salidas (id_articulo,cantidad,id_usuario_entrega,fecha,entregado,id_peticion) VALUES (".$idart.",".$cant.",".$idus.",now(),'s',0);"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//se descuenta del almacen
+			$sql="UPDATE inv_almacen SET disponible=disponible-".$cant." WHERE idarticulo=".$idart.";";
+			//echo($sql);
+			$result2=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//revisar si la cantidad es menor a cero
+			$count="0";
+			$sql= "SELECT disponible FROM inv_almacen WHERE idarticulo=".$idart."";
+			$result3=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result3)){
+				$count=$row["disponible"];
+			}
+			if(intval($count)<0){//entonces un update
+				$sql="UPDATE inv_almacen SET disponible=0 WHERE idarticulo=".$idart.";";
+				$result4=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			}
+			
+		}
+		public function getDetallePeticiones(){
+		$uss=array("","","","","","","","","");		
+			require('settings.php');
+		$sql="SELECT  inv_peticiones.id_peticion,inv_articulos.nombre, inv_peticiones.cantidad, (SELECT disponible FROM inv_almacen WHERE inv_almacen.idarticulo=inv_peticiones.id_articulo limit 1)AS disponibles,inv_peticiones.fecha,(inv_usuarios.nombre || ' ' || inv_usuarios.paterno || ' ' || inv_usuarios.materno) as nusuario , inv_departamentos.nombre as ndepartamento, inv_peticiones.id_usuario_peticion, inv_peticiones.id_articulo FROM inv_peticiones INNER JOIN inv_articulos ON inv_articulos.idarticulo=inv_peticiones.id_articulo LEFT JOIN inv_usuarios ON inv_usuarios.idusuario = inv_peticiones.id_usuario_peticion LEFT JOIN inv_departamentos ON inv_departamentos.id_departamento=inv_usuarios.id_departamento WHERE inv_peticiones.entregada=0 ORDER BY inv_peticiones.id_peticion ASC";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['id_peticion'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	            
+	             $uss[2]=$uss[2].",".$row['cantidad'];
+	             $uss[3]=$uss[3].",".$row['disponibles']; 
+	             $uss[4]=$uss[4].",".$row['fecha'];
+	             $uss[5]=$uss[5].",".$row['nusuario']; 
+	             $uss[6]=$uss[6].",".$row['ndepartamento'];
+	             
+	             $uss[7]=$uss[7].",".$row['id_usuario_peticion'];
+	             
+	            $uss[8]=$uss[8].",".$row['id_articulo'];
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+				$uss[4]=substr($uss[4], 1, strlen($uss[4]));
+				$uss[5]=substr($uss[5], 1, strlen($uss[5]));
+				$uss[6]=substr($uss[6], 1, strlen($uss[6]));
+				$uss[7]=substr($uss[7], 1, strlen($uss[7]));
+				$uss[8]=substr($uss[8], 1, strlen($uss[8]));				
+		      return $uss;	
+	
+	
+		}
+		public function generaSalida($idart, $cant,$idus,$idusrecibe,$idpeticion){
+			require('settings.php');
+	      $sql="INSERT INTO inv_salidas (id_articulo,cantidad,id_usuario_entrega,fecha,entregado,id_peticion,id_usuario_recibe) VALUES (".$idart.",".$cant.",".$idus.",now(),'s',".$idpeticion.",".$idusrecibe.");"; 
+	      $dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//se descuenta del almacen
+			$sql="UPDATE inv_almacen SET disponible=disponible-".$cant." WHERE idarticulo=".$idart.";";
+			//echo($sql);
+			$result2=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			//revisar si la cantidad es menor a cero
+			$count="0";
+			$sql= "SELECT disponible FROM inv_almacen WHERE idarticulo=".$idart."";
+			$result3=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result3)){
+				$count=$row["disponible"];
+			}
+			if(intval($count)<0){//entonces un update
+				$sql="UPDATE inv_almacen SET disponible=0 WHERE idarticulo=".$idart.";";
+				$result4=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			}
+			
+			$sql="UPDATE inv_peticiones SET entregada=1, id_usuario_entrega=".$idus." WHERE id_peticion=".$idpeticion.";";
+			$result5=pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		}
+		public function generaRequicision($idart,$cantidad,$id_peticion,$idus){
+			require('settings.php');
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$sql="SELECT COUNT(*) as disponible FROM inv_req_compras WHERE id_peticion=".$id_peticion.";";
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			$count="0";
+			while($row=pg_fetch_assoc($result)){
+				$count=$row["disponible"];
+			}
+			if(intval($count)==0){
+			$sql="INSERT INTO inv_req_compras (id_articulo,cantidad,id_peticion,id_usuario_toma_peticion,fecha_envio) VALUES(".$idart.",".$cantidad.",".$id_peticion.",".$idus.",now());";
+			$result2 = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			}
+			
+			
+		}
+		public function getNombreArt($idart){
+			require('settings.php');
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$sql="SELECT nombre FROM inv_articulos WHERE idarticulo=".$idart.";";
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			$nombre="";
+			while($row=pg_fetch_assoc($result)){
+				$nombre=$row["nombre"];
+			}
+			return $nombre; 
+			
+			
+		}
+		public function getNombreUS($idus){
+			require('settings.php');
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$sql="SELECT nombre || ' '|| paterno || ' '||materno as nombre FROM inv_usuarios WHERE idusuario=".$idus.";";
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			$nombre="";
+			while($row=pg_fetch_assoc($result)){
+				$nombre=$row["nombre"];
+			}
+			return $nombre; 
+			
+			
+		}
+		public function getReqCompras(){
+		$uss=array("","","","","","","","","","","","","","","");		
+			require('settings.php');
+		$sql="SELECT inv_req_compras.idrq,inv_req_compras.cantidad,inv_articulos.nombre,(SELECT inv_proveedores.nombre FROM inv_proveedores WHERE inv_proveedores.idproveedor=inv_articulos.id_proveedor1)as prov1,inv_articulos.precio1,to_number(inv_articulos.precio1,'99D99')*inv_req_compras.cantidad as total1,(SELECT inv_proveedores.nombre FROM inv_proveedores WHERE inv_proveedores.idproveedor=inv_articulos.id_proveedor2)as prov2,inv_articulos.precio2,to_number(inv_articulos.precio2,'99D99')*inv_req_compras.cantidad as total2,(SELECT inv_proveedores.nombre FROM inv_proveedores WHERE inv_proveedores.idproveedor=inv_articulos.id_proveedor3)as prov3,inv_articulos.precio3,to_number(inv_articulos.precio3,'99D99')*inv_req_compras.cantidad as total3,id_proveedor1,id_proveedor2,id_proveedor3 FROM inv_req_compras INNER JOIN inv_articulos ON inv_articulos.idarticulo=inv_req_compras.id_articulo INNER JOIN inv_peticiones ON inv_peticiones.id_peticion=inv_req_compras.id_peticion INNER JOIN inv_usuarios ON inv_usuarios.idusuario=inv_req_compras.id_usuario_toma_peticion WHERE inv_req_compras.liberada=0";
+			$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+			$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+			while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['idrq'];
+	             $uss[1]=$uss[1].",".$row['cantidad']; 
+	            
+	             $uss[2]=$uss[2].",".$row['nombre'];
+	             $uss[3]=$uss[3].",".$row['prov1']; 
+	             $uss[4]=$uss[4].",".$row['precio1'];
+	             $uss[5]=$uss[5].",".$row['total1']; 
+	             $uss[6]=$uss[6].",".$row['prov2'];
+	             
+	             $uss[7]=$uss[7].",".$row['precio2'];
+	             
+	            $uss[8]=$uss[8].",".$row['total2'];
+	            $uss[9]=$uss[9].",".$row['prov3'];
+	            $uss[10]=$uss[10].",".$row['precio3'];
+	            $uss[11]=$uss[11].",".$row['total3'];
+	             $uss[12]=$uss[12].",".$row['id_proveedor1'];
+	              $uss[13]=$uss[13].",".$row['id_proveedor2'];
+	               $uss[14]=$uss[14].",".$row['id_proveedor3'];
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+				$uss[4]=substr($uss[4], 1, strlen($uss[4]));
+				$uss[5]=substr($uss[5], 1, strlen($uss[5]));
+				$uss[6]=substr($uss[6], 1, strlen($uss[6]));
+				$uss[7]=substr($uss[7], 1, strlen($uss[7]));
+				$uss[8]=substr($uss[8], 1, strlen($uss[8]));		
+				$uss[9]=substr($uss[9], 1, strlen($uss[9]));
+				$uss[10]=substr($uss[10], 1, strlen($uss[10]));
+				$uss[11]=substr($uss[11], 1, strlen($uss[11]));	
+				$uss[12]=substr($uss[12], 1, strlen($uss[12]));
+				$uss[13]=substr($uss[13], 1, strlen($uss[13]));
+				$uss[14]=substr($uss[14], 1, strlen($uss[14]));			
+		      return $uss;	
+		}
+		public function apruebaCompra($idrq,$costo,$iduss,$idprov){
+		require('settings.php');
+		$sql="UPDATE inv_req_compras SET costo=".$costo.", fecha=now(), liberada=1, id_proveedor=".$idprov.",id_usuario_libera=".$iduss." WHERE idrq=".$idrq.";";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		
+		}
+		public function getUsuarios(){
+		$uss=array("","","","","","","","");
+		require('settings.php');
+		$sql="SELECT MD5(idusuario) AS idusuario, inv_usuarios.nombre, paterno, materno, nick, nivel, inv_usuarios.id_departamento,inv_departamentos.nombre as dpto FROM inv_usuarios LEFT JOIN inv_departamentos ON inv_departamentos.id_departamento=inv_usuarios.id_departamento WHERE inv_usuarios.borrado=0";	
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());		
+		while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['idusuario'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	            
+	             $uss[2]=$uss[2].",".$row['paterno'];
+	             $uss[3]=$uss[3].",".$row['materno']; 
+	             $uss[4]=$uss[4].",".$row['nick'];
+	             $uss[5]=$uss[5].",".$row['nivel']; 
+	             $uss[6]=$uss[6].",".$row['id_departamento'];
+	           	$uss[7]=$uss[7].",".$row['dpto'];
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+				$uss[3]=substr($uss[3], 1, strlen($uss[3]));
+				$uss[4]=substr($uss[4], 1, strlen($uss[4]));
+				$uss[5]=substr($uss[5], 1, strlen($uss[5]));
+				$uss[6]=substr($uss[6], 1, strlen($uss[6]));		
+				$uss[7]=substr($uss[7], 1, strlen($uss[7]));	
+		      return $uss;	
+		}		
+		public function getDepartamentos(){
+		$uss=array("","","");
+		require('settings.php');
+		$sql="SELECT id_departamento, nombre, descripcion FROM inv_departamentos;";	
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());		
+		while($row=pg_fetch_assoc($result)){
+					
+					//echo('Hola');
+				
+	             $uss[0]=$uss[0].",".$row['id_departamento'];
+	             $uss[1]=$uss[1].",".$row['nombre']; 
+	            
+	             $uss[2]=$uss[2].",".$row['descripcion'];
+				}
+				
+				
+				$uss[0]=substr($uss[0], 1, strlen($uss[0]));
+				
+				$uss[1]=substr($uss[1], 1, strlen($uss[1]));
+				$uss[2]=substr($uss[2], 1, strlen($uss[2]));
+		      return $uss;	
+		
+		}
+		public function yaEstaNick($nick){
+		require('settings.php');
+		$sql="SELECT COUNT(*) AS c FROM inv_usuarios WHERE nick='".$nick."' AND borrado=0;";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());		
+		$count="0";
+		while($row=pg_fetch_assoc($result)){
+		$count=$row["c"];
+		
+		}
+		$resp=false;
+		if(intval($count)>0){
+		$resp=true;
+		}
+		return $resp;
+		}
+		public function yaEstaNick2($nick,$id){
+		require('settings.php');
+		$sql="SELECT COUNT(*) AS c FROM inv_usuarios WHERE nick='".$nick."' AND MD5(idusuario) <> '".$id."' AND borrado=0;";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());		
+		$count="0";
+		while($row=pg_fetch_assoc($result)){
+		$count=$row["c"];
+		
+		}
+		$resp=false;
+		if(intval($count)>0){
+		$resp=true;
+		}
+		return $resp;
+		}
+		public function agregaUsuario($nombre,$paterno,$materno,$nick,$contraseña,$nivel,$dpto){
+		require('settings.php');
+		$sql="INSERT INTO inv_usuarios (nombre,paterno,materno,nick,password,nivel,id_departamento) VALUES('".$nombre."','".$paterno."','".$materno."','".$nick."',MD5('".$contraseña."'),'".$nivel."',".$dpto.");";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());	
+		
+		}
+		public function bajaUsuario($idus){
+		require('settings.php');
+		$sql="UPDATE inv_usuarios SET borrado=1 WHERE MD5(idusuario)='".$idus."';";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());
+		
+		}
+		public function editaUsuario($id,$nombre,$paterno,$materno,$nick,$contraseña,$nivel,$dpto){
+		require('settings.php');
+		if($contraseña!="")
+		$sql="UPDATE inv_usuarios SET nombre='".$nombre."',paterno='".$paterno."',materno='".$materno."',nick='".$nick."',password=MD5('".$contraseña."'),nivel='".$nivel."',id_departamento=".$dpto." WHERE MD5(idusuario)='".$id."';";
+		else
+		$sql="UPDATE inv_usuarios SET nombre='".$nombre."',paterno='".$paterno."',materno='".$materno."',nick='".$nick."',nivel='".$nivel."',id_departamento=".$dpto." WHERE MD5(idusuario)='".$id."';";
+		$dbconn = pg_pconnect($strCnx) or die('No se ha podido conectar: ' . pg_last_error());
+		$result = pg_query($sql) or die('La consulta fallo: ' . pg_last_error());	
+		
+		}
+}
+?>
